@@ -10,6 +10,7 @@ pygame.display.set_caption('Кто читает тот умрет')
 clock = pygame.time.Clock()
 
 heat_sound = pygame.mixer.Sound('Resourses/sounds/inGame/snd_curtgunshot.ogg')
+money_sound = pygame.mixer.Sound('Resourses/sounds/inGame/money.mp3')
 small_font = pygame.font.Font('Resourses/fonts/Minecraft Rus NEW.otf', 20)
 big_font = pygame.font.Font('Resourses/fonts/Minecraft Rus NEW.otf', 40)
 
@@ -111,6 +112,7 @@ class Crystal(pygame.sprite.Sprite):
     def update(self):
         self.rect = self.rect.move(0, 3)
         if pygame.sprite.spritecollideany(self, player):
+            money_sound.play()
             self.ban = True
 
     def get_ban(self):
@@ -145,7 +147,7 @@ music_cave = pygame.mixer.Sound('Resourses/sounds/backgroundSound/music_cave.mp3
 
 
 def mini_game():
-    timer = 60
+    timer = 30
     tick = 0
     running = True
     pygame.mixer.init()
@@ -190,11 +192,16 @@ def mini_game():
 
         if heart.get_hp() == 0:
             running = False
-            pygame.quit()
-            sys.exit()
+            music_cave.stop()
+            return False
 
-        if timer == 0:
+        if timer == 0 and count >= 5:
+            music_cave.stop()
             return True
+        elif timer == 0:
+            running = False
+            music_cave.stop()
+            return False
 
         attack1.draw(screen)
         attack1.update()
@@ -209,12 +216,18 @@ def mini_game():
         heart.heat()
 
         crystal_text = small_font.render(f'У вас {count} кристалл', True, 'white')
-        hp_text = small_font.render(f'У вас {heart.get_hp()} HP', True, 'white')
+        hp_text = small_font.render(f'У вас {heart.get_hp()}/3 HP', True, 'white')
         timer_text = big_font.render(f'{timer}', True, 'white')
+        text_info = big_font.render(f'Собери 5  кристаллов за 30с', True, 'white')
 
         screen.blit(crystal_text, (50, 50))
         screen.blit(hp_text, (50, 100))
         screen.blit(timer_text, (300, 50))
+        screen.blit(text_info, (100, 500))
 
         pygame.display.flip()
         clock.tick(60)
+
+
+if __name__ == '__main__':
+    mini_game()
